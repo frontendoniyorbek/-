@@ -152,6 +152,8 @@ button:hover {
 	padding: 10px;
 	border-radius: 5px;
 	flex: 1;
+	max-width: 100%; /* Boshlang'ich kenglik */
+	transition: width 0.3s ease; /* Kenglik o'zgarishi uchun silliqlik */
 }
 
 /* Стиль для input внутри контейнера */
