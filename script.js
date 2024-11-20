@@ -1,130 +1,158 @@
 let categoryId = 0;
 
-// LocalStorage'dan ma'lumotlarni yuklash
+// Загрузка категорий из LocalStorage
 function loadCategories() {
 	const storedCategories = JSON.parse(localStorage.getItem('categories')) || [];
 	if (storedCategories.length > 0) {
 		categoryId = Math.max(...storedCategories.map(category => category.id)) + 1;
 		storedCategories.forEach(category => createCategoryFromStorage(category, null));
+		updateSubcategoryButtons(); // Обновление кнопок подкатегорий после загрузки
 	}
 }
 
-// LocalStorage'ga kategoriyalarni saqlash
+// Сохранение категорий в LocalStorage
 function saveCategories() {
-	const categories = [];
-	document.querySelectorAll('#accordionContainer > .category').forEach(category => {
-		categories.push(getCategoryData(category));
-	});
+	const categories = Array.from(document.querySelectorAll('#accordionContainer > .category')).map(category =>
+		getCategoryData(category)
+	);
 	localStorage.setItem('categories', JSON.stringify(categories));
 }
 
-// Kategoriya ma'lumotlarini olish
+// Получение данных категории для сохранения
 function getCategoryData(category) {
-	const subcategories = [];
-	category
-		.querySelector('.accordion')
-		.querySelectorAll(':scope > .category')
-		.forEach(subcategory => {
-			subcategories.push(getCategoryData(subcategory));
-		});
-
+	const subcategories = Array.from(category.querySelector('.accordion').querySelectorAll(':scope > .category')).map(subcategory =>
+		getCategoryData(subcategory)
+	);
 	return {
 		id: parseInt(category.dataset.id, 10),
 		name: category.querySelector('input').value,
-		isOpen: category.querySelector('.accordion').classList.contains('open'), // Track open/close state
-		subcategories: subcategories,
+		isOpen: category.querySelector('.accordion').classList.contains('open'),
+		subcategories: subcategories, // Включаем вложенные подкатегории
 	};
 }
 
-// LocalStorage'dan yuklangan kategoriyani yaratish
+// Создание категории из данных в LocalStorage
 function createCategoryFromStorage(data, parent = null) {
 	const category = document.createElement('div');
 	category.classList.add('category');
 	category.dataset.id = data.id;
 
+	// Общий контейнер для toggle-иконки и input
+	const headerContainer = document.createElement('div');
+	headerContainer.className = 'header-container';
+
 	const toggleIcon = document.createElement('span');
-	toggleIcon.textContent = data.isOpen ? '▲' : '▼'; // Show open/close icon based on state
+	toggleIcon.textContent = data.isOpen ? '▼' : '►';
 	toggleIcon.className = `toggle-icon ${data.subcategories.length === 0 ? 'hidden' : ''}`;
 	toggleIcon.onclick = () => toggleAccordion(toggleIcon, category);
+
+	// Контейнер для input и кнопки удаления
+	const inputContainer = document.createElement('div');
+	inputContainer.className = 'input-container';
 
 	const input = document.createElement('input');
 	input.type = 'text';
 	input.value = data.name;
 	input.placeholder = 'Введите название категории';
-	input.oninput = () => saveCategories();
+	input.oninput = saveCategories;
 
 	const deleteBtn = document.createElement('button');
-	deleteBtn.textContent = 'X';
+	deleteBtn.innerHTML = `<img src="./images/clode-circle.svg" alt="Удалить">`;
 	deleteBtn.className = 'delete-btn';
 	deleteBtn.onclick = () => deleteCategory(category, parent);
 
+	inputContainer.append(input, deleteBtn);
+
+	// Добавляем toggleIcon и inputContainer в headerContainer
+	headerContainer.append(toggleIcon, inputContainer);
+
+	// Кнопка добавления подкатегории
 	const addSubcategoryBtn = document.createElement('button');
-	addSubcategoryBtn.textContent = '+ Добавить подкатегорию';
+	addSubcategoryBtn.textContent = '+ Добавить подкатегорию 1-уровня';
 	addSubcategoryBtn.className = 'add-subcategory-btn';
 	addSubcategoryBtn.onclick = () => addSubcategory(category);
 
+	// Аккордеон для подкатегорий
 	const accordion = document.createElement('div');
 	accordion.classList.add('accordion');
 	if (data.isOpen) {
-		accordion.classList.add('open'); // Apply open state if category was saved as open
+		accordion.classList.add('open');
 	}
 
-	// Subkategoriyalarni rekursiv tarzda yuklash
+	// Рекурсивное создание подкатегорий
 	if (data.subcategories.length > 0) {
 		data.subcategories.forEach(subcategory => createCategoryFromStorage(subcategory, category));
 	}
 
-	category.append(toggleIcon, input, deleteBtn, accordion, addSubcategoryBtn);
+	// Добавляем все элементы в категорию
+	category.append(headerContainer, accordion, addSubcategoryBtn);
 
-	// Agar parent bo'lsa, uni tekshirish va kategoriya qo'shish
 	if (parent) {
 		const parentAccordion = parent.querySelector('.accordion');
 		if (parentAccordion) {
 			parentAccordion.appendChild(category);
 		}
-
 		const parentToggleIcon = parent.querySelector('.toggle-icon');
 		if (parentToggleIcon) {
 			parentToggleIcon.classList.remove('hidden');
 		}
 	} else {
-		// Agar root bo'lsa, asosiy konteynerga qo'shish
 		document.getElementById('accordionContainer').appendChild(category);
 	}
 }
 
-// Yangi kategoriya yaratish
+// Создание новой категории
 function createCategory(parent = null) {
 	const newCategory = {
 		id: categoryId++,
 		name: '',
 		subcategories: [],
-		isOpen: false, // Default state is closed
+		isOpen: false, // Начальное состояние закрыто
 	};
 
 	createCategoryFromStorage(newCategory, parent);
 	saveCategories();
+	updateSubcategoryButtons(); // Обновляем текст кнопок подкатегорий
 }
 
-// Subkategoriya qo'shish
+// Добавление подкатегории
 function addSubcategory(parentCategory) {
 	createCategory(parentCategory);
+	updateSubcategoryButtons(); // Обновляем текст кнопок подкатегорий
 }
 
-// Accordionni ochish/yopish
+// Обновление текста кнопок для добавления подкатегорий
+function updateSubcategoryButtons() {
+	document.querySelectorAll('.add-subcategory-btn').forEach(button => {
+		const parentCategory = button.closest('.category');
+		const subcategoryCount = parentCategory.querySelectorAll('.accordion > .category').length;
+		button.textContent = `+ Добавить подкатегорию ${subcategoryCount + 1}-уровня`;
+	});
+}
+
+// Переключение состояния аккордеона
 function toggleAccordion(toggleIcon, category) {
 	const accordion = category.querySelector('.accordion');
-	const isOpen = accordion.classList.toggle('open'); // Toggle the open state
-	toggleIcon.textContent = isOpen ? '▲' : '▼'; // Change the icon based on the state
+	const isOpen = accordion.classList.toggle('open'); // Переключаем состояние открытия
 
-	saveCategories(); // Save the state of the categories to localStorage after toggle
+	// Устанавливаем максимальную высоту для аккордеона в зависимости от экрана
+	const screenHeight = window.innerHeight;
+	const maxHeight = screenHeight * 0.6; // 60% высоты экрана
+
+	// Устанавливаем max-height в зависимости от состояния
+	accordion.style.maxHeight = isOpen ? `${maxHeight}px` : '0';
+
+	// Обновляем иконку
+	toggleIcon.textContent = isOpen ? '▼' : '►';
+	saveCategories(); // Сохраняем состояние
 }
 
-// Kategoriya o'chirish
+// Удаление категории
 function deleteCategory(category, parent) {
 	category.remove();
 	saveCategories();
 
+	// Скрыть иконку toggle, если нет подкатегорий
 	if (parent) {
 		const parentAccordion = parent.querySelector('.accordion');
 		if (parentAccordion.children.length === 0) {
@@ -133,10 +161,14 @@ function deleteCategory(category, parent) {
 	}
 }
 
-// Sahifani yangilagan paytda LocalStorage'dan kategoriyalarni yuklash
-document.addEventListener('DOMContentLoaded', function () {
+// Событие загрузки страницы
+document.addEventListener('DOMContentLoaded', () => {
 	loadCategories();
+	updateSubcategoryButtons(); // Обновляем кнопки при загрузке
 });
 
-// Hodisa yuklash
-document.getElementById('addCategoryBtn').onclick = () => createCategory();
+// Обработчик кнопки добавления категории
+document.getElementById('addCategoryBtn').onclick = () => {
+	createCategory();
+	updateSubcategoryButtons(); // Обновляем кнопки после создания категории
+};

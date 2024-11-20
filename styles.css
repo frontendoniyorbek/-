@@ -1,4 +1,4 @@
-/* Umumiy o'rnatish */
+/* Общие настройки */
 body {
 	font-family: 'Montserrat', sans-serif;
 	margin: 0;
@@ -10,20 +10,20 @@ body {
 	background-color: #f4f4f4;
 }
 
-/* Akordeon uchun konteyner */
+/* Контейнер для аккордеона */
 #accordionContainer {
-	width: 80%;
-	max-width: 700px;
+	width: 100%;
+	max-width: 450px;
 	margin-top: 20px;
 }
 
-/* Kategoriya dizayni */
+/* Дизайн категории */
 .category {
 	margin-bottom: 10px;
 	padding-left: 10px;
 }
 
-/* Toggle icon (cheksiz akordeon ochish va yopish uchun) */
+/* Иконка для переключения (для открытия и закрытия аккордеона) */
 .toggle-icon {
 	cursor: pointer;
 	margin-right: 5px;
@@ -31,30 +31,26 @@ body {
 	font-weight: bold;
 }
 
-/* Bu holatni ko'rsatuvchi "yashirish" */
+/* Скрытие иконки, если подкатегорий нет */
 .toggle-icon.hidden {
 	visibility: hidden;
 }
 
-/* Input maydoni */
+/* Стиль для input (поля ввода) */
 input {
-	width: 250px;
-	padding: 5px;
-	margin-right: 10px;
-	font-size: 14px;
-	border: 1px solid #ccc;
-	border-radius: 4px;
+	background-color: transparent;
 }
 
-/* Butonlar */
+/* Общие стили для кнопок */
 button {
 	padding: 5px 10px;
 	margin-left: 5px;
 	background-color: #007bff;
 	color: white;
 	border: none;
-	border-radius: 4px;
+	border-radius: 5px;
 	margin-bottom: 20px;
+	border: 1px solid #dadae6;
 	cursor: pointer;
 }
 
@@ -62,47 +58,57 @@ button:hover {
 	background-color: #0056b3;
 }
 
-/* Podkategoriya qo'shish tugmasi */
+/* Кнопка для добавления подкатегории */
 .add-subcategory-btn {
-	background-color: #28a745;
+	border: 1px solid #dadae6;
+	background-color: rgba(105, 80, 243, 0.1);
+	color: #6950f3;
+	font-family: 'Montserrat', sans-serif;
+	font-size: 12px;
+	text-align: center;
+	line-height: 1.2;
+	padding: 6px;
+	cursor: pointer;
 }
 
 .add-subcategory-btn:hover {
-	background-color: #218838;
+	background-color: rgb(105, 80, 243, 0.3);
 }
 
-/* Accordion panel dizayni */
+/* Дизайн панели аккордеона */
 .accordion {
 	margin-top: 10px;
 	padding-left: 20px;
 	max-height: 0;
-	overflow: hidden;
+	overflow: hidden; /* Это предотвращает выход содержимого за пределы панели */
 	opacity: 0;
 	transition: max-height 0.5s ease-out, opacity 0.3s ease-out;
 }
 
-/* Akordeon paneli ochilganda */
+/* Состояние аккордеона при открытии */
 .accordion.open {
-	max-height: 1000px; /* Cheksiz o'sishni ta'minlash uchun */
+	max-height: 300px; /* Максимальная высота панели */
+	overflow: auto; /* Добавляет скролл, если высота превышает максимально допустимую */
 	opacity: 1;
 	transition: max-height 0.5s ease-in, opacity 0.3s ease-in;
 }
 
-/* Akordeon animatsiyasi */
+/* Дизайн категорий внутри аккордеона */
 .accordion .category {
 	margin-bottom: 5px;
 }
 
-/* O'chirish tugmasi */
+/* Стиль кнопки удаления */
 .delete-btn {
-	background-color: #dc3545;
+	background-color: transparent;
 }
 
 .delete-btn:hover {
-	background-color: #c82333;
+	background-color: transparent;
+	transform: scale(1.2); /* Увеличение кнопки при наведении */
 }
 
-/* Accordionni qayta ochish va yopish uchun animatsiya */
+/* Анимация для аккордеона при открытии и закрытии */
 .accordion-enter {
 	max-height: 0;
 	opacity: 0;
@@ -127,4 +133,59 @@ button:hover {
 	opacity: 0;
 	transform: scaleY(0.95);
 	transition: all 300ms ease-in;
+}
+
+/* Контейнер для toggle-иконки и input */
+.header-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-between; /* Максимальное пространство между элементами */
+	gap: 10px; /* Промежуток между элементами */
+	margin-bottom: 5px;
+}
+
+/* Стиль оборачивающего div для input и кнопки удаления */
+.input-container {
+	display: flex;
+	align-items: center;
+	border: 1px solid #dadae6;
+	padding: 10px;
+	border-radius: 5px;
+	flex: 1;
+}
+
+/* Стиль для input внутри контейнера */
+.input-container input {
+	flex: 1; /* Занимает всю доступную ширину */
+	border: none;
+	outline: none;
+	padding: 5px;
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 500;
+	font-size: 12px;
+	color: #1c1c21;
+}
+
+/* Стиль для кнопки удаления внутри контейнера */
+.input-container .delete-btn {
+	background: none;
+	border: none;
+	margin: 0;
+	cursor: pointer;
+}
+
+.input-container .delete-btn img {
+	width: 20px;
+	height: 20px;
+}
+
+/* Стиль для поля ввода при фокусе */
+.input-container input:focus {
+	border: none;
+	outline: none;
+}
+
+.input-container:focus-within {
+	border-color: #007bff;
+	box-shadow: 0 0 3px rgba(0, 123, 255, 0.5);
 }
